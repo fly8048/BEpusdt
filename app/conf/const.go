@@ -5,7 +5,9 @@ const (
 	Github = "https://github.com/v03413/BEpusdt"
 )
 
-const Debug = false
+const Debug = true
+
+const Clean = true
 
 const (
 	Bsc      = "bsc" // Binance Smart Chain

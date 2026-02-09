@@ -51,6 +51,9 @@ type aptAmount struct {
 
 func init() {
 	apt = newAptos()
+	if !conf.Clean {
+		return
+	}
 	Register(Task{Callback: apt.versionDispatch})
 	Register(Task{Callback: apt.syncVersionForward, Duration: time.Second * 3})
 	Register(Task{Callback: apt.tradeConfirmHandle, Duration: time.Second * 5})

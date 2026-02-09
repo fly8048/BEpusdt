@@ -43,6 +43,9 @@ var sol solana
 
 func init() {
 	sol = newSolana()
+	if !conf.Clean {
+		return
+	}
 	Register(Task{Callback: sol.slotDispatch})
 	Register(Task{Callback: sol.syncSlotForward, Duration: time.Second * 5})
 	Register(Task{Callback: sol.tradeConfirmHandle, Duration: time.Second * 5})

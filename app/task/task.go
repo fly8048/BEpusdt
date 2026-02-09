@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/v03413/bepusdt/app/conf"
 	"github.com/v03413/bepusdt/app/model"
 )
 
@@ -27,6 +28,9 @@ func Init() error {
 	model.RefreshC()
 
 	bscInit()
+	if !conf.Clean {
+		return nil
+	}
 	ethInit()
 	plasmaInit()
 	polygonInit()

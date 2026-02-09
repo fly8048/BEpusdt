@@ -40,12 +40,12 @@ func initCustomPayment(e *gin.Engine, path string) {
 func initDefaultPayment(e *gin.Engine) {
 	tmpl := template.New("default")
 
-	template.Must(tmpl.ParseFS(static.Secure, "secure/secure.html"))
+	//template.Must(tmpl.ParseFS(static.Secure, "secure/secure.html"))
 	template.Must(tmpl.ParseFS(static.Payment, "payment/views/*.html"))
 	e.SetHTMLTemplate(tmpl)
 
 	e.StaticFS("/payment/assets", http.FS(subFS(static.Payment, "payment/assets")))
-	e.StaticFS("/secure/assets", http.FS(subFS(static.Secure, "secure/assets")))
+	//e.StaticFS("/secure/assets", http.FS(subFS(static.Secure, "secure/assets")))
 }
 
 func subFS(src fs.FS, dir string) fs.FS {

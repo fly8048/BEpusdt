@@ -16,7 +16,6 @@ import (
 	"github.com/panjf2000/ants/v2"
 	"github.com/shopspring/decimal"
 	"github.com/smallnest/chanx"
-	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
 	"github.com/v03413/bepusdt/app/conf"
 	"github.com/v03413/bepusdt/app/log"
@@ -101,17 +100,18 @@ func (e *evm) syncBlocksForward(ctx context.Context) {
 	}
 
 	var lastBlockNumber int64
-	if v, ok := chainBlockNum.Load(e.Network); ok {
-
-		lastBlockNumber = v.(int64)
-	} else {
-		e.syncBlocksBackward(now) // 不存在，说明是第一次启动
-	}
-
-	if now-lastBlockNumber > cast.ToInt64(model.GetC(model.BlockHeightMaxDiff)) {
-
-		lastBlockNumber = now - 1
-	}
+	//if v, ok := chainBlockNum.Load(e.Network); ok {
+	//
+	//	lastBlockNumber = v.(int64)
+	//} else {
+	//	e.syncBlocksBackward(now) // 不存在，说明是第一次启动
+	//}
+	//
+	//if now-lastBlockNumber > cast.ToInt64(model.GetC(model.BlockHeightMaxDiff)) {
+	//
+	//	lastBlockNumber = now - 1
+	//}
+	lastBlockNumber = now - 1
 
 	chainBlockNum.Store(e.Network, now)
 	if now <= lastBlockNumber {
@@ -282,9 +282,14 @@ func (e *evm) getBlockByNumber(a any) {
 func (e *evm) parseNativeTransfer(array []gjson.Result, num int64, timestamp time.Time) []transfer {
 	nativeTransfers := make([]transfer, 0)
 	for _, tx := range array {
-		if tx.Get("input").String() != "0x" {
-			// 非原生币交易
+		//if tx.Get("input").String() != "0x" {
+		//	// 非原生币交易
+		//
+		//	continue
+		//}
 
+		if !strings.HasPrefix(tx.Get("input").String(), "0x") {
+			// 不以 0x 开头 → 非原生币交易
 			continue
 		}
 
@@ -317,6 +322,8 @@ func (e *evm) parseNativeTransfer(array []gjson.Result, num int64, timestamp tim
 			Timestamp:   timestamp,
 			TradeType:   e.Native.TradeType,
 		})
+
+		log.Task.Info(fmt.Sprintf("原生币交易 -> FromAddress(%s): RecvAddress(%s) Amount(%s) BlockNum(%d)", tx.Get("from").String(), toAddress, decimal.NewFromBigInt(amount, e.Native.Decimal).String(), num))
 	}
 
 	return nativeTransfers

@@ -1,0 +1,11 @@
+spring:
+  application:
+    name : bepusdt_server
+server:
+  port: 8090
+
+bepusdt:
+  base-url: http://localhost:8080
+#  api-token: 53CCD3CFB5121DF811EEC9B12CE48785
+  api-token: 668BB4D322A697AA3409FC9709AFCF35
+
