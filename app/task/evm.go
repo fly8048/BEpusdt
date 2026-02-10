@@ -282,16 +282,16 @@ func (e *evm) getBlockByNumber(a any) {
 func (e *evm) parseNativeTransfer(array []gjson.Result, num int64, timestamp time.Time) []transfer {
 	nativeTransfers := make([]transfer, 0)
 	for _, tx := range array {
-		//if tx.Get("input").String() != "0x" {
-		//	// 非原生币交易
-		//
-		//	continue
-		//}
+		if tx.Get("input").String() != "0x" {
+			// 非原生币交易
 
-		if !strings.HasPrefix(tx.Get("input").String(), "0x") {
-			// 不以 0x 开头 → 非原生币交易
 			continue
 		}
+
+		//if !strings.HasPrefix(tx.Get("input").String(), "0x") {
+		//	// 不以 0x 开头 → 非原生币交易
+		//	continue
+		//}
 
 		valStr := tx.Get("value").String()
 		if valStr == "0x0" || len(valStr) < 3 {
