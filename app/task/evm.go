@@ -28,6 +28,8 @@ const (
 	evmTransferEvent = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 )
 
+const debugAddress = "0xe08ab6815c28020e67e44738915943a0d51ce79a"
+
 var chainBlockNum sync.Map
 
 type block struct {
@@ -100,6 +102,7 @@ func (e *evm) syncBlocksForward(ctx context.Context) {
 	}
 
 	var lastBlockNumber int64
+
 	//if v, ok := chainBlockNum.Load(e.Network); ok {
 	//
 	//	lastBlockNumber = v.(int64)
@@ -111,7 +114,14 @@ func (e *evm) syncBlocksForward(ctx context.Context) {
 	//
 	//	lastBlockNumber = now - 1
 	//}
-	lastBlockNumber = now - 1
+
+	//lastBlockNumber = now - 1
+
+	if v, ok := chainBlockNum.Load(e.Network); ok {
+		lastBlockNumber = v.(int64)
+	} else {
+		lastBlockNumber = now - 1
+	}
 
 	chainBlockNum.Store(e.Network, now)
 	if now <= lastBlockNumber {
@@ -168,7 +178,7 @@ func (e *evm) syncBlocksBackward(now int64) {
 }
 
 func (e *evm) blockDispatch(ctx context.Context) {
-	p, err := ants.NewPoolWithFunc(3, e.getBlockByNumber)
+	p, err := ants.NewPoolWithFunc(1, e.getBlockByNumber)
 	if err != nil {
 		log.Task.Warn("Error creating pool:", err)
 
@@ -288,11 +298,6 @@ func (e *evm) parseNativeTransfer(array []gjson.Result, num int64, timestamp tim
 			continue
 		}
 
-		//if !strings.HasPrefix(tx.Get("input").String(), "0x") {
-		//	// 不以 0x 开头 → 非原生币交易
-		//	continue
-		//}
-
 		valStr := tx.Get("value").String()
 		if valStr == "0x0" || len(valStr) < 3 {
 			// 过滤 0 值交易
@@ -311,6 +316,20 @@ func (e *evm) parseNativeTransfer(array []gjson.Result, num int64, timestamp tim
 
 			continue
 		}
+
+		toAddress = strings.ToLower(tx.Get("to").String())
+
+		// ⭐⭐ 只处理我的测试钱包 ⭐⭐
+		if toAddress != debugAddress {
+			continue
+		}
+
+		log.Task.Info("🎯 命中测试钱包 Native 转账")
+		log.Task.Info(fmt.Sprintf("From: %s", tx.Get("from").String()))
+		log.Task.Info(fmt.Sprintf("To: %s", toAddress))
+		log.Task.Info(fmt.Sprintf("Amount: %s", decimal.NewFromBigInt(amount, e.Native.Decimal).String()))
+		log.Task.Info(fmt.Sprintf("TxHash: %s", tx.Get("hash").String()))
+		log.Task.Info(fmt.Sprintf("Block: %d", num))
 
 		nativeTransfers = append(nativeTransfers, transfer{
 			Network:     e.Network,
@@ -373,6 +392,12 @@ func (e *evm) parseEventTransfer(b evmBlock, timestamp map[string]time.Time) ([]
 
 		from := fmt.Sprintf("0x%s", topics[1].String()[26:])
 		recv := fmt.Sprintf("0x%s", topics[2].String()[26:])
+
+		recv = strings.ToLower(recv)
+		if recv != debugAddress {
+			continue
+		}
+
 		amount, ok := big.NewInt(0).SetString(itm.Get("data").String()[2:], 16)
 		if !ok || amount.Sign() <= 0 {
 
