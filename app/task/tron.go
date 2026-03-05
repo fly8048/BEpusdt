@@ -42,9 +42,9 @@ var tr tron
 
 func init() {
 	tr = newTron()
-	if !conf.Clean {
-		return
-	}
+	//if conf.CleanMode {
+	//	return
+	//}
 	Register(Task{Duration: time.Second, Callback: tr.blockDispatch})
 	Register(Task{Duration: time.Second * 3, Callback: tr.syncBlocksForward})
 	Register(Task{Duration: time.Second * 5, Callback: tr.tradeConfirmHandle})

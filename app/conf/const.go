@@ -7,7 +7,7 @@ const (
 
 const Debug = true
 
-const Clean = true
+const CleanMode = true
 
 const (
 	Bsc      = "bsc" // Binance Smart Chain
