@@ -29,9 +29,7 @@ func Init() error {
 	if conf.CleanMode {
 		return nil
 	}
-
 	bscInit()
-
 	ethInit()
 	plasmaInit()
 	polygonInit()
