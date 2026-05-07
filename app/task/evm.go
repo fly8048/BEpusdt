@@ -64,7 +64,11 @@ func (e *evm) syncBlocksForward(ctx context.Context) {
 	}
 
 	post := []byte(`{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}`)
-	req, err := http.NewRequestWithContext(ctx, "POST", e.rpcEndpoint(), bytes.NewBuffer(post))
+
+	ctx1, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx1, "POST", e.rpcEndpoint(), bytes.NewBuffer(post))
 	if err != nil {
 		log.Task.Warn("Error creating request:", err)
 
@@ -350,7 +354,7 @@ func (e *evm) parseNativeTransfer(array []gjson.Result, num int64, timestamp tim
 
 func (e *evm) parseEventTransfer(b evmBlock, timestamp map[string]time.Time) ([]transfer, error) {
 	transfers := make([]transfer, 0)
-	post := []byte(fmt.Sprintf(`{"jsonrpc":"2.0","method":"eth_getLogs","params":[{"fromBlock":"0x%x","toBlock":"0x%x","topics":["%s"]}],"id":1}`, b.From, b.To, evmTransferEvent))
+	post := []byte(fmt.Sprintf(`{"jsonrpc":"2.0","method":"eth_getLogs","params":[{"fromBlock":"0x%x","toBlock":"0x%x","topics":["%s"],"address":"%s"}],"id":1}`, b.From, b.To, evmTransferEvent, conf.UsdtErc20))
 	resp, err := e.Client.Post(e.rpcEndpoint(), "application/json", bytes.NewBuffer(post))
 	if err != nil {
 

@@ -26,11 +26,12 @@ var (
 
 func Init() error {
 	model.RefreshC()
-
-	bscInit()
-	if !conf.Clean {
+	if conf.CleanMode {
 		return nil
 	}
+
+	bscInit()
+
 	ethInit()
 	plasmaInit()
 	polygonInit()

@@ -43,7 +43,7 @@ var sol solana
 
 func init() {
 	sol = newSolana()
-	if !conf.Clean {
+	if conf.CleanMode {
 		return
 	}
 	Register(Task{Callback: sol.slotDispatch})

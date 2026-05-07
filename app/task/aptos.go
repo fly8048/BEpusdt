@@ -51,7 +51,7 @@ type aptAmount struct {
 
 func init() {
 	apt = newAptos()
-	if !conf.Clean {
+	if conf.CleanMode {
 		return
 	}
 	Register(Task{Callback: apt.versionDispatch})
